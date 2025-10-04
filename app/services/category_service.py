@@ -3,14 +3,37 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..models.cactegory import Category
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
-
-
 from ..schemas import category_schema
+from pathlib import Path
+from fastapi import UploadFile
+import uuid
+import shutil
+import json
 
-async def create_category(category: category_schema.CategoryCreate, db: AsyncSession):
+UPLOAD_DIR = Path("media/category")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+async def create_category(
+    data: str,
+    db: AsyncSession,
+    image: UploadFile = None
+    ):
+    parsed = json.loads(data)
+    category = category_schema.CategoryCreate(**parsed) 
+    
+    image_path = None
+
+    if image:
+        ext = Path(image.filename).suffix
+        filename = f"{uuid.uuid4()}{ext}"
+        image_path = UPLOAD_DIR / filename
+        with image_path.open("wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+
     new_category = Category(
         name=category.name,
-        description=category.description
+        description=category.description,
+        image=str(image_path.as_posix()) if image_path else None
     )
     db.add(new_category)
     try:

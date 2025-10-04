@@ -15,6 +15,7 @@ class ProductCreate(ProductBase):
 
 class ProductOut(ProductBase):
     id: str
+    image: Optional[str]
     category: Optional[CategoryOut] = None  # relación expandida
     class Config:
         orm_mode = True

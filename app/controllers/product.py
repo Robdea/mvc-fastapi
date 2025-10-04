@@ -1,47 +1,50 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File, Form
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..db import mysql_bd
 from ..schemas import product_schema
-from ..services import product_service
-
+from ..services.product_service import ProductService
+from ..utils.service_factory import service_factory
+import shutil
+import os
 router = APIRouter(prefix="/product", tags=["product"])
 
 
 @router.get("/", response_model=list[product_schema.ProductOut])
 async def get_all(
-    db: AsyncSession = Depends(mysql_bd.get_db)
+    service: ProductService = Depends(service_factory(ProductService))
 ):
-    list_products = await product_service.get_products(db=db)
+    list_products = await service.get_products()
     return list_products
 
 @router.get("/{product_id}", response_model=product_schema.ProductOut)
 async def get_by_id(
     product_id:str,
-    db: AsyncSession = Depends(mysql_bd.get_db)
+    service: ProductService = Depends(service_factory(ProductService))
 ):
-    product = await product_service.get_product_by_id(product_id=product_id, db= db)
+    product = await service.get_product_by_id(product_id=product_id)
     return product
 
 @router.delete("/{product_id}")
 async def delete(
     product_id: str,
-    db: AsyncSession = Depends(mysql_bd.get_db)
+    service: ProductService = Depends(service_factory(ProductService))
 ):
-    return await product_service.delete_product(product_id, db)    
+    return await service.delete_product(product_id)    
 
 @router.get("/by-category/{category_id}", response_model=list[product_schema.ProductOut])
 async def list_products_by_category(
     category_id: str, 
-    db: AsyncSession = Depends(mysql_bd.get_db)
+    service: ProductService = Depends(service_factory(ProductService))
 ):
-    return await product_service.get_products_by_category(category_id, db)
+    return await service.get_products_by_category(category_id)
 
-@router.post("/", response_model=product_schema.ProductOut)
+@router.post("/")
 async def create_category(
-    product: product_schema.ProductCreate,
-    db: AsyncSession = Depends(mysql_bd.get_db)
+    data: str = Form(...),
+    image: UploadFile = File(None),
+    service: ProductService = Depends(service_factory(ProductService))
 ):
-    created_category = await product_service.create_product(product=product, db=db)
+    
+    created_category = await service.create_product(data=data, image=image)
     return created_category
 
     

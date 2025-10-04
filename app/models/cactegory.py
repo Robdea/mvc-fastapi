@@ -10,7 +10,8 @@ class Category(Base):
     id = Column(CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(100), nullable=False, unique=True)
     description = Column(Text, nullable=True)
-    
+    image = Column(String(255), nullable=True)
+
     # Relación con productos
     products = relationship("Product", back_populates="category")
 

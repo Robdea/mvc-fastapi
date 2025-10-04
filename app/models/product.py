@@ -18,3 +18,5 @@ class Product(Base):
     # Relaciones
     category = relationship("Category", back_populates="products", lazy="selectin")
     reviews = relationship("Review", back_populates="product")
+    # transaction_items = relationship("TransactionItem", back_populates="product")
+

@@ -14,5 +14,6 @@ class CategoryUpdate(CategoryBase):
 
 class CategoryOut(CategoryBase):
     id: str
+    image: Optional[str]
     class Config:
         orm_mode = True

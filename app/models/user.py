@@ -2,6 +2,7 @@ import uuid
 from sqlalchemy import Column, String, DateTime, Enum as SAEnum
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.mysql import CHAR  
+from sqlalchemy.orm import relationship
 from ..db.mysql_bd import Base
 from ..utils.enums.rol import Rol 
 
@@ -17,4 +18,5 @@ class User(Base):
     address = Column(String(180), nullable=False)
     register_time = Column(DateTime(timezone=True), server_default=func.now())
 
+    # transactions = relationship("Transaction", back_populates="user")
 

@@ -1,3 +1,4 @@
+from .news import News
 from .user import User
 from .product import Product
 from .cactegory import Category

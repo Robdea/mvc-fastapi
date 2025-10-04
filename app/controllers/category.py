@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..db import mysql_bd
 from ..schemas import category_schema
@@ -44,10 +44,11 @@ async def patch_category(
 
 @router.post("/", response_model=category_schema.CategoryOut)
 async def create_category(
-    category: category_schema.CategoryCreate,
+    data: str = Form(...),
+    image: UploadFile = File(None),
     db: AsyncSession = Depends(mysql_bd.get_db)
 ):
-    created_category = await category_service.create_category(category=category, db=db)
+    created_category = await category_service.create_category(data=data, db=db, image=image)
     return created_category
 
 
