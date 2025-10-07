@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Response, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from ..services.auth_services import AuthService
+from ..schemas.user_schema import UserOut
 from ..utils.service_factory import service_factory
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -36,7 +37,7 @@ async def login(
     )
     return {"message": "Login exitoso", "user": user_data["user"]}
 
-@router.post("/refresh")
+@router.get("/refresh")
 async def refresh(
     request: Request, 
     response: Response,
@@ -45,7 +46,7 @@ async def refresh(
     refresh = await service.refresh_token(request, response)
     return refresh
 
-@router.post("/me")
+@router.get("/me", response_model=UserOut)
 async def get_me(
     request: Request,
     service: AuthService = Depends(service_factory(AuthService))

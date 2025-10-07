@@ -81,4 +81,4 @@ class AuthService:
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
         
-        return {"id": user.id, "username": user.name, "email": user.email}
+        return user
