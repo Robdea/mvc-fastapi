@@ -19,3 +19,19 @@ async def get_all_news(
     service: NewsService = Depends(service_factory(NewsService)),
 ):
     return await service.get_all_news()
+
+@router.delete("/{new_id}")
+async def delete(
+    new_id: int,
+    service: NewsService = Depends(service_factory(NewsService)),
+):
+    return await service.delete_new(new_id)
+
+@router.patch("/{news_id}")
+async def patch_news(
+    news_id: int,
+    data: str = Form(...),
+    image_url: UploadFile = File(None),
+    service: NewsService = Depends(service_factory(NewsService))
+):
+    return await service.update_news(news_id, data, image_url)

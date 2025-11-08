@@ -18,5 +18,5 @@ class User(Base):
     address = Column(String(180), nullable=False)
     register_time = Column(DateTime(timezone=True), server_default=func.now())
 
-    # transactions = relationship("Transaction", back_populates="user")
+    transactions = relationship("Transaction", back_populates="user",cascade="all, delete-orphan",lazy="selectin")
 

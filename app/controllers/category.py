@@ -35,10 +35,11 @@ async def get_by_id(
 @router.patch("/{category_id}")
 async def patch_category(
     category_id: str,
-    category: category_schema.CategoryUpdate,
+    data: str = Form(...),
+    image: UploadFile = File(None),
     db: AsyncSession = Depends(mysql_bd.get_db)
 ):
-    category = await category_service.patch_category(category_id, category, db)
+    category = await category_service.patch_category(category_id,data,db,image)
     return category
     
 

@@ -15,3 +15,8 @@ class NewsOut(BaseModel):
 class NewsCreate(BaseModel):
     title: str
     content: str
+
+class NewsUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    

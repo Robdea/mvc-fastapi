@@ -5,13 +5,15 @@ from .controllers.user import router as user_router
 from .controllers.category import router as category_router
 from .controllers.news import router as news_router
 from .controllers.product import router as product_router
+from .controllers.pay_stripe import router as pay_router
+from .controllers.solds import router as solds_router
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title="Ecommerce API")
 app.mount("/media", StaticFiles(directory="media"), name="media")
 
-origins = ["http://127.0.0.1:5000"]
+origins = ["http://127.0.0.1:5000", "http://localhost:5000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,6 +32,8 @@ async def startup():
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(news_router)
+app.include_router(solds_router)
+app.include_router(pay_router)
 app.include_router(category_router)
 app.include_router(product_router)
         

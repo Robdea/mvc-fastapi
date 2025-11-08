@@ -5,6 +5,7 @@ from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from ..schemas import category_schema
 from pathlib import Path
+import os
 from fastapi import UploadFile
 import uuid
 import shutil
@@ -59,26 +60,65 @@ async def delete_category(
 ):
    category = await get_category_by_id(category_id, db)
    
+   if category.image:
+       image_path = Path(category.image)
+       
+       if image_path.exists():
+            try:
+                os.remove(image_path)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"No se pudo eliminar la imagen: {str(e)}"
+                )
+                
    await db.delete(category)
    await db.commit()
+   
    return {"message": "Category deleted successfully"}
 
 # update
 async def patch_category(
     category_id: str,
-    category: category_schema.CategoryUpdate,
-    db: AsyncSession
+    data: str,
+    db: AsyncSession,
+    image: UploadFile = None
 ):
-    db_category = await get_category_by_id(category_id,db)
+    parsed = json.loads(data)
+    update_data = category_schema.CategoryUpdate(**parsed)
 
-    update_data = category.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(db_category, key, value)
-    
-    await db.commit()
-    await db.refresh(db_category)
-    return db_category
-    
+    # Buscar categoría existente
+    res = await db.execute(select(Category).where(Category.id == category_id))
+    category = res.scalars().first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    # Manejo de imagen
+    if image:
+        # Eliminar imagen anterior si existía
+        if category.image and Path(category.image).exists():
+            Path(category.image).unlink()
+
+        # Guardar nueva imagen
+        ext = Path(image.filename).suffix
+        filename = f"{uuid.uuid4()}{ext}"
+        image_path = UPLOAD_DIR / filename
+        with image_path.open("wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+        category.image = str(image_path.as_posix())
+
+    # Actualizar solo los campos enviados
+    for key, value in update_data.dict(exclude_unset=True).items():
+        setattr(category, key, value)
+
+    try:
+        await db.commit()
+        await db.refresh(category)
+        return category
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Category name already exists")
+  
 async def get_categories(
     db: AsyncSession
 ):
